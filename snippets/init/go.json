@@ -44,7 +44,7 @@
       "/*",
       "   Author  : Chenwei Jiang",
       "   Date    : $CURRENT_YEAR-$CURRENT_MONTH-$CURRENT_DATE",
-      "   Email   : ${1:email}",
+      "   Email   : ${1:cheverjonathan@gmail.com}",
       "*/$0"
     ],
     "description": "Author"
