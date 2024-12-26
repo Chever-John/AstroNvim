@@ -42,7 +42,7 @@
     "prefix": "todo",
     "body": [
       "/*",
-      "   Author  : Jayce Zhao",
+      "   Author  : Chenwei Jiang",
       "   Date    : $CURRENT_YEAR-$CURRENT_MONTH-$CURRENT_DATE",
       "   Email   : ${1:email}",
       "*/$0"
