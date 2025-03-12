@@ -10,6 +10,12 @@ There are some langs I used as following:
 
 ## 🛠️ Installation
 
+### Install Neovim
+
+Plz must follow the official ways, [link](https://github.com/neovim/neovim/blob/master/INSTALL.md#linux).
+
+![image-20250312165005396](assets/image-20250312165005396.png)
+
 ### Make a backup of your current nvim and shared folder
 
 ```shell
@@ -30,7 +36,7 @@ track your user configuration in GitHub.
 ### Clone the repository
 
 ```shell
-git clone https://github.com/<your_user>/<your_repository> ~/.config/nvim
+git clone git@github.com:Chever-John/dotfiles.git ~/.config/nvim
 ```
 
 ### Start Neovim
