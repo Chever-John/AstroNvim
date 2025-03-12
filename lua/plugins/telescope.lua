@@ -83,6 +83,14 @@ return {
       extensions = {},
     })
   end,
-  config = function(...) require "astronvim.plugins.configs.telescope"(...) end,
+
+  config = function(...)
+    local status_ok, telescope_config = pcall(require, "astronvim.utils.plugins.telescope")
+    if status_ok then
+      return telescope_config(...)
+    else
+      return require("telescope").setup(...)
+    end
+  end,
 }
 
