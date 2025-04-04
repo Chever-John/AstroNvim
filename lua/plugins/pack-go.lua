@@ -142,30 +142,49 @@ return {
 		},
 	},
 	-- Golang support
+	-- I am tring to config the nvim-treesitter plugin with specific enhancements for Go Development in Neovim.
 	{
 		"nvim-treesitter/nvim-treesitter",
+		-- optional: Plugin won't couse errors if not installed
 		optional = true,
 		opts = function(_, opts)
+			-- Configuration login here
+			--
+			-- This section ensures that all Go-related parsers are installed:
+			-- `go`: Main Go language parser;
+			-- `gomod`: Parser for go.mod files;
+			-- `gosum`: Parser for go.sum files;
+			-- `gowork`: Parser for go.work files;
 			if opts.ensure_installed ~= "all" then
 				opts.ensure_installed =
 					require("astrocore").list_insert_unique(opts.ensure_installed, { "go", "gomod", "gosum", "gowork" })
 			end
 
-			-- 启用 Treesitter 缩进功能
+			-- treesitter indentation Configuration
+			-- This:
+			-- 1. Ensures the indent table exists;
+			-- 2. Enables treesitter indentation globally;
+			-- 3. Makes sure Go isn't in the list of languages with disabled indentation.
 			opts.indent = opts.indent or {}
 			opts.indent.enabled = true
-
+			-- The `vim.tbl_filter` function creates a new table containing only elems where the callback returns true - effectively removing "go" from the disable list if it exists.
 			if opts.indent.disable then
 				opts.indent.disable = vim.tbl_filter(function(lang)
 					return lang ~= "go"
 				end, opts.indent.disable)
 			end
 
-			-- 为 Go 语言添加更好的中括号处理
+			-- Auto Bracket Handing for Go
+			-- This creates an autocommand that triggers when editing Go files to set up two helpful key mappings:
+			-- 1. When you type [ and press Enter in insert mode:
+			--		1.1 It will insert [ and ] on separate lines;
+			--		1.2 Place your cursor on a new line between the Brackets
+			-- 2. When you type { and press Enter in insert mode:
+			--		2.1It will insert { and } on separate lines
+			--		2.2 Place your cursor on a new line between the braces 
 			vim.api.nvim_create_autocmd("FileType", {
 				pattern = "go",
 				callback = function()
-					-- 中括号换行时自动将光标放在合适位置
 					vim.keymap.set("i", "[<CR>", "[<CR>]<ESC>O", { buffer = true, silent = true })
 					vim.keymap.set("i", "{<CR>", "{<CR>}<ESC>O", { buffer = true, silent = true })
 				end,
