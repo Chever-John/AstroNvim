@@ -150,6 +150,26 @@ return {
 				opts.ensure_installed =
 					require("astrocore").list_insert_unique(opts.ensure_installed, { "go", "gomod", "gosum", "gowork" })
 			end
+
+			-- 启用 Treesitter 缩进功能
+			opts.indent = opts.indent or {}
+			opts.indent.enabled = true
+
+			if opts.indent.disable then
+				opts.indent.disable = vim.tbl_filter(function(lang)
+					return lang ~= "go"
+				end, opts.indent.disable)
+			end
+
+			-- 为 Go 语言添加更好的中括号处理
+			vim.api.nvim_create_autocmd("FileType", {
+				pattern = "go",
+				callback = function()
+					-- 中括号换行时自动将光标放在合适位置
+					vim.keymap.set("i", "[<CR>", "[<CR>]<ESC>O", { buffer = true, silent = true })
+					vim.keymap.set("i", "{<CR>", "{<CR>}<ESC>O", { buffer = true, silent = true })
+				end,
+			})
 		end,
 	},
 	{
