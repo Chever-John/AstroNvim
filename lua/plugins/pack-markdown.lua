@@ -117,6 +117,10 @@ return {
       bullet = {
         right_pad = 1,
       },
+      latext = {
+        enabled = true, 
+        executable = vim.fn.expand('~/.local/bin/latexencode')
+      }
     },
     dependencies = { "nvim-treesitter/nvim-treesitter", "echasnovski/mini.nvim" },
   },

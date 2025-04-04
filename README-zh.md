@@ -369,3 +369,57 @@ Selene 是一个用 Rust 编写的快速、现代的 Lua 代码静态分析工�
 ![image-20241128133821416](assets/image-20241128133821416.png)
 
 授權正確就行了。
+
+### render-markdown 组件
+
+最初遇到的问题是 latex2text 没有安装，我使用了如下方案。
+
+需要 LaTeX 支持，`render-markdown.nvim` 实际上依赖的是 Python 包 `pylatexenc`，可以通过以下方式安装：
+
+```shell
+# 使用 pipx 安装 (推荐，避免污染系统 Python)
+pipx install pylatexenc
+
+# 或者在虚拟环境中安装
+python3 -m venv ~/.local/share/nvim/latex-env
+source ~/.local/share/nvim/latex-env/bin/activate
+pip install pylatexenc
+```
+
+然后需要确保 Neovim 能够找到这个包：
+
+```lua
+-- 在你的 Neovim 配置中
+require('render-markdown').setup({
+  latex = {
+    enabled = true,
+    -- 如果需要，指定 pylatexenc 的路径
+    -- executable = vim.fn.expand('~/.local/bin/pylatexenc')
+  }
+})
+```
+
+实际上在这个项目中，我的配置如下：
+
+```
+{
+  "MeanderingProgrammer/render-markdown.nvim",
+  ft = { "markdown", "markdown.mdx" },
+  event = "VeryLazy",
+  opts = {
+    bullet = {
+      right_pad = 1,
+    },
+    latex = {
+      enabled = true,
+      -- 如果需要，指定 pylatexenc 的路径
+      -- executable = vim.fn.expand('~/.local/bin/pylatexenc')
+    }
+  },
+  dependencies = { "nvim-treesitter/nvim-treesitter", "echasnovski/mini.nvim" },
+},
+```
+
+![image-20250404021252659](assets/image-20250404021252659.png)
+
+上面操作完之后，就会出现左边可以下载之后的组件。
