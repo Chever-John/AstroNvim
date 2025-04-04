@@ -12,8 +12,8 @@ return {
       ---@param opts AstroCoreOpts
       opts = function(_, opts)
         local maps = require("astrocore").empty_map_table()
-        maps.n["<C-/>"] = opts.mappings.n["<Leader>/"]
-        maps.x["<C-/>"] = opts.mappings.x["<Leader>/"]
+        maps.n["<C-_>"] = opts.mappings.n["<Leader>/"]
+        maps.x["<C-_>"] = opts.mappings.x["<Leader>/"]
         -- end
         maps.n["<Leader>/"] = false
         maps.x["<Leader>/"] = false
