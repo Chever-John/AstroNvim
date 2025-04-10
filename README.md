@@ -36,7 +36,7 @@ track your user configuration in GitHub.
 ### Clone the repository
 
 ```shell
-git clone git@github.com:Chever-John/dotfiles.git ~/.config/nvim
+git clone git@github.com:Chever-John/AstroNvim.git ~/.config/nvim
 ```
 
 ### Start Neovim
