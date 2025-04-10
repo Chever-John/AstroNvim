@@ -2,7 +2,7 @@
 return {
   "AstroNvim/astrocore",
   version = false,
-  branch = "v2",
+  tag = "v2",
   ---@type AstroCoreOpts
   ---@diagnostic disable-next-line: assign-type-mismatch
   opts = function(_, opts)
