@@ -7,7 +7,7 @@
 return {
   "AstroNvim/astroui",
   version = false,
-  branch = "v3",
+  tag = "v3",
   dependencies = { "echasnovski/mini.icons" },
   ---@type AstroUIOpts
   opts = {

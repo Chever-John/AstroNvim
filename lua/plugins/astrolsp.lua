@@ -26,7 +26,7 @@ end
 return {
   "AstroNvim/astrolsp",
   version = false,
-  branch = "v3",
+  tag = "v3",
   ---@type AstroLSPOpts
   ---@diagnostic disable-next-line: assign-type-mismatch
   opts = function(_, opts)
