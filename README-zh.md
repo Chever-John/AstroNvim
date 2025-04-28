@@ -1,5 +1,9 @@
 # NVIM
 
+Other imports docs:
+
+1. My key mappings, plz click this [link](./docs/mappings.md)
+
 又爱又恨啊，被我自己之前的版本给坑了，所以这次我决定重新来一遍。
 
 总结了之前的问题，我过于纠结自己写一套完美的 lua 的 nvim 配置，从而导致很多情况下，没有能够及时跟进，所以我决定尝试使用成熟的 nvim 项目。
