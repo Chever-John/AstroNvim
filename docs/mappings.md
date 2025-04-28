@@ -65,15 +65,17 @@
 
 ### List Management
 
-| Action                    | Mappings      | Explanation |
-| ------------------------- | ------------- | ----------- |
-| Open Quickfix List        | `Leader + xq` |             |
-| Next Quickfix Entry       | `]q`          |             |
-| Previous Quickfix Entry   | `[q`          |             |
-| Last Quickfix Entry       | `]Q`          |             |
-| First Quickfix Entry      | `[Q`          |             |
-| Open Local List           | `Leader + xl` |             |
-| Next Local List Entry     | `]l`          |             |
-| Previous Local List Entry | `[l`          |             |
-| Last Local List Entry     | `]L`          |             |
-| First Local List Entry    | `[L`          |             |
+注意，这里我使用了 trouble.nvim，请访问[链接](./QuickfixCheck/README.md)
+
+| Action                     | Mappings      | Explanation        |
+| -------------------------- | ------------- | ------------------ |
+| Open Quickfix List         | `Leader + xX` | 打开工作区诊断     |
+| Open Current Quickfix List | `Leader + xx` | 切换到当前文件诊断 |
+|                            |               |                    |
+| Last Quickfix Entry        | `]Q`          |                    |
+| First Quickfix Entry       | `[Q`          |                    |
+| Open Local List            | `Leader + xl` |                    |
+| Next Local List Entry      | `]l`          |                    |
+| Previous Local List Entry  | `[l`          |                    |
+| Last Local List Entry      | `]L`          |                    |
+| First Local List Entry     | `[L`          |                    |
