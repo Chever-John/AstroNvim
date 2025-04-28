@@ -1,7 +1,3 @@
-if true then return {} end -- WARN: REMOVE THIS LINE TO ACTIVATE THIS FILE
-
--- Customize Mason plugins
-
 ---@type LazySpec
 return {
   -- use mason-lspconfig to configure LSP installations
@@ -11,6 +7,9 @@ return {
     opts = {
       ensure_installed = {
         "lua_ls",
+        "gopls",
+        "delve",
+        "goimports",
         -- add more arguments for adding more language servers
       },
     },
