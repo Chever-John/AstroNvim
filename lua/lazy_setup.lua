@@ -18,6 +18,9 @@ require("lazy").setup({
 	-- Configure any other `lazy.nvim` configuration options here
 	install = { colorscheme = { "tokyonight-moon" } },
 	ui = { backdrop = 100 },
+	-- 当前 94 个插件均不依赖 luarocks，禁用后消除 checkhealth 的
+	-- hererocks/luarocks 报错；未来若有插件需要 rocks，lazy 会明确报错提示
+	rocks = { enabled = false },
 	performance = {
 		rtp = {
 			-- disable some rtp plugins, add more to your liking
