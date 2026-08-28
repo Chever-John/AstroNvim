@@ -50,7 +50,8 @@ return {
     opts = {
       ---@diagnostic disable: missing-fields
       config = {
-        bufls = {
+        -- lspconfig 已将 bufls 改名为 buf_ls（由 buf CLI 的 buf beta lsp 提供）
+        buf_ls = {
           filetypes = { "proto" },
           single_file_support = true,
           on_attach = function()
@@ -95,8 +96,9 @@ return {
     "WhoIsSethDaniel/mason-tool-installer.nvim",
     optional = true,
     opts = function(_, opts)
-      opts.ensure_installed =
-        require("astrocore").list_insert_unique(opts.ensure_installed, { "buf-language-server", "buf" })
+      -- buf-language-server 已被上游归档并从 mason registry 移除，
+      -- LSP 能力并入 buf CLI 本体（buf beta lsp），只装 buf 即可
+      opts.ensure_installed = require("astrocore").list_insert_unique(opts.ensure_installed, { "buf" })
     end,
   },
   {
