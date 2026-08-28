@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Neovim 插件 Top 30：去重后的价值判断</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f2f0ea;
+      --paper: #fffdf8;
+      --ink: #181a18;
+      --muted: #62665f;
+      --line: #d8d5cc;
+      --accent: #176a4a;
+      --accent-soft: #e1eee7;
+      --warn: #8c4d13;
+      --warn-soft: #f5e9d8;
+      --danger: #8a3030;
+      --danger-soft: #f4dfdd;
+      --neutral-soft: #ebe9e3;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #151816;
+        --paper: #1c201d;
+        --ink: #eef1ed;
+        --muted: #a8afa8;
+        --line: #343a35;
+        --accent: #70c79e;
+        --accent-soft: #203c30;
+        --warn: #e2a45e;
+        --warn-soft: #3e3020;
+        --danger: #ef8d89;
+        --danger-soft: #432726;
+        --neutral-soft: #292e2a;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font: 15px/1.65 ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .92em; }
+    .wrap { width: min(1180px, calc(100% - 32px)); margin: 0 auto; }
+    header { padding: 56px 0 34px; border-bottom: 1px solid var(--line); background: var(--paper); }
+    .eyebrow { margin: 0 0 10px; color: var(--accent); font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    h1 { max-width: 860px; margin: 0; font-size: clamp(32px, 5vw, 58px); line-height: 1.04; letter-spacing: -.045em; }
+    .lede { max-width: 820px; margin: 22px 0 0; color: var(--muted); font-size: 18px; }
+    .meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+    .chip, .status {
+      display: inline-flex; align-items: center; min-height: 26px; padding: 3px 9px;
+      border: 1px solid var(--line); border-radius: 999px; background: var(--neutral-soft);
+      font-size: 12px; font-weight: 700; white-space: nowrap;
+    }
+    main { padding: 36px 0 72px; }
+    section { margin-top: 48px; }
+    section:first-child { margin-top: 0; }
+    h2 { margin: 0 0 10px; font-size: 26px; line-height: 1.2; letter-spacing: -.02em; }
+    h3 { margin: 0; font-size: 18px; line-height: 1.3; }
+    .sub { max-width: 820px; margin: 0 0 22px; color: var(--muted); }
+    .verdict {
+      display: grid; grid-template-columns: 1.2fr .8fr; gap: 20px; padding: 24px;
+      border: 1px solid var(--line); background: var(--paper);
+    }
+    .verdict strong { color: var(--accent); }
+    .numbers { display: grid; grid-template-columns: repeat(2, 1fr); border-left: 1px solid var(--line); }
+    .number { padding: 10px 18px; }
+    .number b { display: block; font-size: 30px; line-height: 1; }
+    .number span { color: var(--muted); font-size: 12px; }
+    .recommendations { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .card { display: flex; flex-direction: column; min-height: 290px; padding: 20px; border: 1px solid var(--line); background: var(--paper); }
+    .card.primary { border-top: 4px solid var(--accent); }
+    .rank { color: var(--muted); font-size: 12px; font-weight: 800; letter-spacing: .08em; }
+    .score { margin-left: auto; color: var(--accent); font: 800 22px/1 ui-monospace, monospace; }
+    .card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+    .card p { margin: 10px 0; color: var(--muted); }
+    .card ul { margin: 8px 0 18px; padding-left: 18px; }
+    .card .bottom { margin-top: auto; padding-top: 12px; border-top: 1px solid var(--line); }
+    .good { background: var(--accent-soft); color: var(--accent); border-color: transparent; }
+    .warning { background: var(--warn-soft); color: var(--warn); border-color: transparent; }
+    .bad { background: var(--danger-soft); color: var(--danger); border-color: transparent; }
+    .conditional { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .conditional article { padding: 20px; border-left: 4px solid var(--warn); background: var(--paper); }
+    .conditional p { margin-bottom: 0; color: var(--muted); }
+    .callout { padding: 16px 18px; border-left: 4px solid var(--danger); background: var(--danger-soft); }
+    .filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 14px; }
+    button {
+      appearance: none; border: 1px solid var(--line); border-radius: 999px; background: var(--paper);
+      color: var(--ink); padding: 7px 11px; cursor: pointer; font: inherit; font-size: 12px; font-weight: 700;
+    }
+    button[aria-pressed="true"] { color: var(--paper); background: var(--accent); border-color: var(--accent); }
+    .table-wrap { overflow-x: auto; border: 1px solid var(--line); background: var(--paper); }
+    table { width: 100%; border-collapse: collapse; min-width: 880px; }
+    th, td { padding: 11px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { position: sticky; top: 0; background: var(--neutral-soft); color: var(--muted); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; }
+    td:first-child, td:nth-child(3) { font-family: ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+    tr:last-child td { border-bottom: 0; }
+    tr.hidden { display: none; }
+    .status.recommend { color: var(--accent); background: var(--accent-soft); border-color: transparent; }
+    .status.blocked, .status.replace { color: var(--warn); background: var(--warn-soft); border-color: transparent; }
+    .status.reject { color: var(--danger); background: var(--danger-soft); border-color: transparent; }
+    .status.used { color: var(--muted); }
+    .method { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; border: 1px solid var(--line); background: var(--line); }
+    .method div { padding: 16px; background: var(--paper); }
+    .method b { display: block; margin-bottom: 5px; }
+    .method span { color: var(--muted); font-size: 13px; }
+    footer { padding: 24px 0 44px; color: var(--muted); border-top: 1px solid var(--line); font-size: 13px; }
+
+    @media (max-width: 860px) {
+      .verdict, .recommendations, .conditional { grid-template-columns: 1fr; }
+      .numbers { border-left: 0; border-top: 1px solid var(--line); }
+      .method { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <p class="eyebrow">GitHub Topic Audit · 2026-08-28</p>
+      <h1>前 30 个热门项目里，真正值得你加的只有 3 个</h1>
+      <p class="lede">你的配置不是“缺插件”，而是已经很重：AstroNvim + 94 个锁定依赖，并且对 Neo-tree、Diffview、Go、LSP、测试、调试都做了定制。继续按 Star 装插件，只会制造重复入口和键位冲突。</p>
+      <div class="meta">
+        <span class="chip">本机 Neovim 0.11.1</span>
+        <span class="chip">lazy-lock：94 项</span>
+        <span class="chip">Topic 样本：30 项</span>
+        <span class="chip">数据源：GitHub Search API + 项目 README</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section>
+      <div class="verdict">
+        <div>
+          <p class="eyebrow">最终判断</p>
+          <h2>立即装：multicursor、yanky；按需装：nvim-dbee</h2>
+          <p><strong>最有价值的不是“更炫的 UI”，而是补齐目前不存在的编辑原语。</strong>多光标和 yank ring 是高频、低耦合、跨语言收益；数据库客户端只在你经常手查 SQL 时成立。Kulala 与 Sidekick 业务价值高，但当前 Neovim 版本不满足最新版要求，先升级再谈。</p>
+        </div>
+        <div class="numbers" aria-label="筛选结果统计">
+          <div class="number"><b>8</b><span>已在使用，直接过滤</span></div>
+          <div class="number"><b>11</b><span>归档、非插件或明显重叠</span></div>
+          <div class="number"><b>3</b><span>现在值得引入</span></div>
+          <div class="number"><b>2</b><span>升级 Neovim 后再评估</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>立即值得引入</h2>
+      <p class="sub">评分不是 GitHub 人气分。权重是：对你现有工作流的净增益 40%、与当前插件的非重叠度 25%、维护健康度 20%、接入成本 15%。</p>
+      <div class="recommendations">
+        <article class="card primary">
+          <div class="card-head"><span class="rank">01 · EDITING PRIMITIVE</span><span class="score">92</span></div>
+          <h3><a href="https://github.com/jake-stewart/multicursor.nvim">jake-stewart/multicursor.nvim</a></h3>
+          <p>补齐你当前配置里完全缺失的多光标能力，不替换 LSP、不碰文件树，也不侵入格式化链路。</p>
+          <ul>
+            <li>支持 normal / insert / replace / visual、undo / redo</li>
+            <li>支持正则拆分光标、列对齐、每光标独立寄存器</li>
+            <li>适合批量改结构相同但不值得写宏的代码</li>
+          </ul>
+          <div class="bottom"><span class="status recommend">建议：直接试用</span> <span class="chip">1,519 stars</span></div>
+        </article>
+
+        <article class="card primary">
+          <div class="card-head"><span class="rank">02 · DAILY FRICTION</span><span class="score">88</span></div>
+          <h3><a href="https://github.com/gbprod/yanky.nvim">gbprod/yanky.nvim</a></h3>
+          <p>解决 Vim 最常见的真实摩擦：刚复制的内容被下一次删除覆盖。它把 yank / put 变成可回溯的数据结构，而不是一次性状态。</p>
+          <ul>
+            <li>yank ring、历史选择器、粘贴后循环历史</li>
+            <li>可直接用 shada 持久化，不必增加 sqlite 依赖</li>
+            <li>映射会覆盖 <code>y/p/P</code>，必须检查现有键位</li>
+          </ul>
+          <div class="bottom"><span class="status recommend">建议：直接试用</span> <span class="chip">1,283 stars</span></div>
+        </article>
+
+        <article class="card">
+          <div class="card-head"><span class="rank">03 · BACKEND WORKFLOW</span><span class="score">79</span></div>
+          <h3><a href="https://github.com/kndndrj/nvim-dbee">kndndrj/nvim-dbee</a></h3>
+          <p>你有 SQL、Go、Proto、Docker 配置，但没有交互式数据库客户端。DBee 的 Go 后端正好补这个闭环。</p>
+          <ul>
+            <li>编辑器内连接、执行、浏览与导出查询结果</li>
+            <li>无需依赖数据库 CLI；当前 Neovim 版本满足 ≥0.10</li>
+            <li>README 明示 Alpha，当前有 61 个 issue 与 16 个 PR；只按命令懒加载</li>
+          </ul>
+          <div class="bottom"><span class="status replace">建议：高频查库才装</span> <span class="chip">1,311 stars</span></div>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <h2>价值高，但现在装是错的</h2>
+      <p class="sub">版本约束属于硬条件，不是“可能有点问题”。先升级并跑完现有配置回归，再引入这些插件。</p>
+      <div class="conditional">
+        <article>
+          <h3><a href="https://github.com/mistweaverco/kulala.nvim">kulala.nvim</a> · 后端 API 工作流</h3>
+          <p>HTTP、GraphQL、gRPC、WebSocket、OpenAPI、认证、断言和脚本都能留在 <code>.http</code> 文件里，长期价值比临时 curl 历史高。问题是最新版明确要求 <strong>Neovim 0.12+</strong>，你当前是 0.11.1。不要偷偷 pin 老版本制造维护债。</p>
+        </article>
+        <article>
+          <h3><a href="https://github.com/folke/sidekick.nvim">sidekick.nvim</a> · AI CLI 工作流</h3>
+          <p>它能把 Codex / Claude / Gemini CLI、上下文提示、diff 审阅和 tmux 会话放进 Neovim；你已有 snacks.nvim，接入条件不错。但最低要求是 <strong>Neovim 0.11.2</strong>，Copilot NES 还需要 Copilot LSP，而你的 copilot.lua 当前显式禁用。</p>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <h2>两个看起来诱人、实际上只适合“替换”的项目</h2>
+      <div class="callout">
+        <strong>不要叠加 Oil 与 CodeDiff。</strong> 你的 Neo-tree 包含垃圾桶删除、按扩展名生成 Go/Proto/Rust 文件骨架；Diffview 则有自定义历史、merge-tool 和冲突选择键位。Oil / CodeDiff 只有在你愿意删掉原方案并重新验收工作流时才有价值。作为第二套入口共存，只会增加认知成本。
+      </div>
+    </section>
+
+    <section>
+      <h2>前 30 项逐个审计</h2>
+      <p class="sub">点击状态过滤。Star 和仓库状态采集于 2026-08-28；“已使用”以 <code>lazy-lock.json</code> 为实际安装基线，并结合 Lua 配置判断功能重叠。</p>
+      <div class="filters" role="group" aria-label="状态过滤">
+        <button type="button" data-filter="all" aria-pressed="true">全部 30</button>
+        <button type="button" data-filter="recommend" aria-pressed="false">立即推荐</button>
+        <button type="button" data-filter="blocked" aria-pressed="false">版本阻塞</button>
+        <button type="button" data-filter="used" aria-pressed="false">已使用</button>
+        <button type="button" data-filter="replace" aria-pressed="false">仅适合替换</button>
+        <button type="button" data-filter="reject" aria-pressed="false">排除</button>
+        <button type="button" data-filter="niche" aria-pressed="false">低优先/小众</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>项目</th><th>Stars</th><th>状态</th><th>判断</th></tr></thead>
+          <tbody>
+            <tr data-status="used"><td>1</td><td><a href="https://github.com/mason-org/mason.nvim">mason-org/mason.nvim</a></td><td>10,454</td><td><span class="status used">已使用</span></td><td>锁文件与配置均存在。</td></tr>
+            <tr data-status="replace"><td>2</td><td><a href="https://github.com/stevearc/oil.nvim">stevearc/oil.nvim</a></td><td>6,851</td><td><span class="status replace">仅适合替换</span></td><td>编辑目录像编辑 buffer 很干净，但会与高度定制的 Neo-tree 形成双入口。</td></tr>
+            <tr data-status="reject"><td>3</td><td><a href="https://github.com/LunarVim/Neovim-from-scratch">LunarVim/Neovim-from-scratch</a></td><td>5,572</td><td><span class="status reject">排除</span></td><td>这是教学配置，不是可插拔插件。</td></tr>
+            <tr data-status="used"><td>4</td><td><a href="https://github.com/stevearc/conform.nvim">stevearc/conform.nvim</a></td><td>5,321</td><td><span class="status used">已使用</span></td><td>已有专门配置与各语言 formatter。</td></tr>
+            <tr data-status="reject"><td>5</td><td><a href="https://github.com/ggandor/leap.nvim">ggandor/leap.nvim</a></td><td>5,029</td><td><span class="status reject">排除</span></td><td>与已安装的 flash.nvim 同属快速跳转原语。</td></tr>
+            <tr data-status="used"><td>6</td><td><a href="https://github.com/MeanderingProgrammer/render-markdown.nvim">render-markdown.nvim</a></td><td>4,960</td><td><span class="status used">已使用</span></td><td>Markdown pack 已配置。</td></tr>
+            <tr data-status="reject"><td>7</td><td><a href="https://github.com/ibhagwan/fzf-lua">ibhagwan/fzf-lua</a></td><td>4,423</td><td><span class="status reject">排除</span></td><td>你已有深度定制 Telescope；除非整体迁移 picker，否则收益为负。</td></tr>
+            <tr data-status="niche"><td>8</td><td><a href="https://github.com/jackMort/ChatGPT.nvim">jackMort/ChatGPT.nvim</a></td><td>4,000</td><td><span class="status">低优先</span></td><td>API 对话层，不如支持现有 Codex/Claude CLI 的 Sidekick 贴合当前工作流。</td></tr>
+            <tr data-status="used"><td>9</td><td><a href="https://github.com/mason-org/mason-lspconfig.nvim">mason-lspconfig.nvim</a></td><td>3,936</td><td><span class="status used">已使用</span></td><td>锁文件与 Mason 配置均存在。</td></tr>
+            <tr data-status="blocked"><td>10</td><td><a href="https://github.com/folke/sidekick.nvim">folke/sidekick.nvim</a></td><td>2,745</td><td><span class="status blocked">版本阻塞</span></td><td>需要 Neovim ≥0.11.2；本机为 0.11.1。Copilot NES 还需要额外 LSP。</td></tr>
+            <tr data-status="reject"><td>11</td><td><a href="https://github.com/ray-x/go.nvim">ray-x/go.nvim</a></td><td>2,657</td><td><span class="status reject">排除</span></td><td>现有 Go pack 已覆盖 gopher、goimpl、DAP、neotest、format/lint。</td></tr>
+            <tr data-status="reject"><td>12</td><td><a href="https://github.com/akiyosi/goneovim">akiyosi/goneovim</a></td><td>2,624</td><td><span class="status reject">排除</span></td><td>独立 GUI 前端，不是 Neovim 插件。</td></tr>
+            <tr data-status="used"><td>13</td><td><a href="https://github.com/stevearc/aerial.nvim">stevearc/aerial.nvim</a></td><td>2,331</td><td><span class="status used">已使用</span></td><td>由当前 AstroNvim 依赖解析并锁定。</td></tr>
+            <tr data-status="used"><td>14</td><td><a href="https://github.com/kawre/leetcode.nvim">kawre/leetcode.nvim</a></td><td>2,163</td><td><span class="status used">已使用</span></td><td>既通过社区包导入，又有本地插件配置。</td></tr>
+            <tr data-status="blocked"><td>15</td><td><a href="https://github.com/mistweaverco/kulala.nvim">mistweaverco/kulala.nvim</a></td><td>2,152</td><td><span class="status blocked">版本阻塞</span></td><td>高价值，但最新版要求 Neovim 0.12+、curl、git、tree-sitter-cli。</td></tr>
+            <tr data-status="reject"><td>16</td><td><a href="https://github.com/stevearc/dressing.nvim">stevearc/dressing.nvim</a></td><td>1,970</td><td><span class="status reject">排除</span></td><td>GitHub 已归档；不要给新配置引入无维护依赖。</td></tr>
+            <tr data-status="used"><td>17</td><td><a href="https://github.com/stevearc/overseer.nvim">stevearc/overseer.nvim</a></td><td>1,923</td><td><span class="status used">已使用</span></td><td>已有 50+ 行本地任务配置。</td></tr>
+            <tr data-status="niche"><td>18</td><td><a href="https://github.com/ravitemer/mcphub.nvim">ravitemer/mcphub.nvim</a></td><td>1,784</td><td><span class="status">低优先</span></td><td>本地没有 Avante/CodeCompanion 等聊天宿主，单装 MCP Hub 不能产生价值。</td></tr>
+            <tr data-status="niche"><td>19</td><td><a href="https://github.com/rachartier/tiny-inline-diagnostic.nvim">tiny-inline-diagnostic.nvim</a></td><td>1,722</td><td><span class="status">低优先</span></td><td>当前 diagnostics virtual_text 已启用；这是展示替换，不是能力增量。</td></tr>
+            <tr data-status="reject"><td>20</td><td><a href="https://github.com/SmiteshP/nvim-navic">SmiteshP/nvim-navic</a></td><td>1,681</td><td><span class="status reject">排除</span></td><td>与已安装的 dropbar.nvim / aerial.nvim 重复。</td></tr>
+            <tr data-status="used"><td>21</td><td><a href="https://github.com/Bekaboo/dropbar.nvim">Bekaboo/dropbar.nvim</a></td><td>1,594</td><td><span class="status used">已使用</span></td><td>已有本地配置。</td></tr>
+            <tr data-status="reject"><td>22</td><td><a href="https://github.com/ggandor/lightspeed.nvim">ggandor/lightspeed.nvim</a></td><td>1,553</td><td><span class="status reject">排除</span></td><td>已归档，并明确被 leap.nvim 取代；而你又已有 Flash。</td></tr>
+            <tr data-status="replace"><td>23</td><td><a href="https://github.com/esmuellert/codediff.nvim">esmuellert/codediff.nvim</a></td><td>1,537</td><td><span class="status replace">仅适合替换</span></td><td>字符级 diff 与 C 引擎有吸引力，但现有 Diffview 已深度定制 merge/history。</td></tr>
+            <tr data-status="recommend"><td>24</td><td><a href="https://github.com/jake-stewart/multicursor.nvim">jake-stewart/multicursor.nvim</a></td><td>1,519</td><td><span class="status recommend">立即推荐</span></td><td>高频、低耦合、能力空白，净收益最高。</td></tr>
+            <tr data-status="reject"><td>25</td><td><a href="https://github.com/ray-x/navigator.lua">ray-x/navigator.lua</a></td><td>1,400</td><td><span class="status reject">排除</span></td><td>LSP/Tree-sitter 导航已被 Telescope、Aerial、Dropbar、Trouble 覆盖。</td></tr>
+            <tr data-status="reject"><td>26</td><td><a href="https://github.com/amitds1997/remote-nvim.nvim">amitds1997/remote-nvim.nvim</a></td><td>1,325</td><td><span class="status reject">排除</span></td><td>GitHub 已归档。</td></tr>
+            <tr data-status="recommend"><td>27</td><td><a href="https://github.com/kndndrj/nvim-dbee">kndndrj/nvim-dbee</a></td><td>1,311</td><td><span class="status recommend">按需推荐</span></td><td>填补数据库交互空白；Alpha 状态决定它不能默认进入核心工作流。</td></tr>
+            <tr data-status="recommend"><td>28</td><td><a href="https://github.com/gbprod/yanky.nvim">gbprod/yanky.nvim</a></td><td>1,283</td><td><span class="status recommend">立即推荐</span></td><td>把复制历史建模为 ring，解决真实且高频的编辑问题。</td></tr>
+            <tr data-status="reject"><td>29</td><td><a href="https://github.com/hrsh7th/nvim-compe">hrsh7th/nvim-compe</a></td><td>1,274</td><td><span class="status reject">排除</span></td><td>已归档；你已有 nvim-cmp 与 blink.cmp 解析项。</td></tr>
+            <tr data-status="niche"><td>30</td><td><a href="https://github.com/benlubas/molten-nvim">benlubas/molten-nvim</a></td><td>1,215</td><td><span class="status">场景限定</span></td><td>只有频繁运行 Jupyter notebook 才值；对当前 Go/后端主路径没有普适收益。</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>筛选方法</h2>
+      <div class="method">
+        <div><b>1. 取数</b><span>GitHub Search API：topic:nvim-plugin，按 stars 降序，per_page=30。</span></div>
+        <div><b>2. 精确去重</b><span>以 lazy-lock.json 的实际解析结果为基线，不只扫配置文件名。</span></div>
+        <div><b>3. 功能去重</b><span>把 Flash/Leap、Telescope/fzf-lua、Dropbar/Navic 等同类项视为重复能力。</span></div>
+        <div><b>4. 硬约束</b><span>核对 archived、Neovim 最低版本、外部二进制与现有定制的破坏风险。</span></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">这份报告不修改你的 Neovim 配置。数据会随 GitHub Star 和维护状态变化；建议安装前再次核对 README 与 Neovim 版本。</div>
+  </footer>
+
+  <script>
+    const buttons = document.querySelectorAll('[data-filter]');
+    const rows = document.querySelectorAll('tbody tr[data-status]');
+    buttons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const filter = button.dataset.filter;
+        buttons.forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
+        rows.forEach((row) => row.classList.toggle('hidden', filter !== 'all' && row.dataset.status !== filter));
+      });
+    });
+  </script>
+</body>
+</html>
