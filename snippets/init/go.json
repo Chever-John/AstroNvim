@@ -28,6 +28,15 @@
     ],
     "description": "for range in i"
   },
+  "for range": {
+    "prefix": "forr",
+    "body": [
+      "for ${1:_}, ${2:v} := range ${3:items} {",
+      "\t${0}",
+      "}"
+    ],
+    "description": "for range without swallowing the separator"
+  },
   "ErrCheck": {
     "prefix": "iferr",
     "body": ["if err != nil {", "\t${3}", "}${0}"],
