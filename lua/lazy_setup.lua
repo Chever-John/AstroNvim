@@ -16,7 +16,7 @@ require("lazy").setup({
 	{ import = "plugins" },
 }--[[@as LazySpec]], {
 	-- Configure any other `lazy.nvim` configuration options here
-	install = { colorscheme = { "tokyonight-moon" } },
+	install = { colorscheme = { "oldworld", "catppuccin-frappe", "astrodark" } },
 	ui = { backdrop = 100 },
 	-- 当前 94 个插件均不依赖 luarocks，禁用后消除 checkhealth 的
 	-- hererocks/luarocks 报错；未来若有插件需要 rocks，lazy 会明确报错提示
