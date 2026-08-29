@@ -493,10 +493,29 @@ end
 
 function M.toggle_lazy_git()
   return function()
-    local worktree = require("astrocore").file_worktree()
-    local flags = worktree and (" --work-tree=%s --git-dir=%s"):format(worktree.toplevel, worktree.gitdir) or ""
-    require("astrocore").toggle_term_cmd {
+    local astrocore = require "astrocore"
+    local worktree = astrocore.file_worktree()
+    local bufnr = vim.api.nvim_get_current_buf()
+    local bufname = vim.api.nvim_buf_get_name(bufnr)
+    local start = vim.bo[bufnr].buftype == "" and bufname ~= "" and bufname or vim.uv.cwd()
+    local root = worktree and worktree.toplevel or vim.fs.root(start, ".git")
+    if not root then
+      vim.notify("LazyGit requires a Git repository", vim.log.levels.WARN)
+      return
+    end
+
+    local flags
+    if worktree then
+      flags = ("--work-tree=%s --git-dir=%s"):format(
+        vim.fn.shellescape(worktree.toplevel),
+        vim.fn.shellescape(worktree.gitdir)
+      )
+    else
+      flags = ("--path=%s"):format(vim.fn.shellescape(root))
+    end
+    astrocore.toggle_term_cmd {
       cmd = "lazygit " .. flags,
+      dir = root,
       direction = "float",
       hidden = true,
       on_open = function() M.remove_keymap("t", "<Esc>") end,
