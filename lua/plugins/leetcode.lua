@@ -55,6 +55,11 @@ return {
 			---@type lc.lang
 			lang = "golang",
 
+			-- leetcode.nvim 默认用 Conceal 渲染正文，oldworld 下几乎与背景同色。
+			theme = {
+				normal = { fg = vim.api.nvim_get_hl(0, { name = "Normal" }).fg },
+			},
+
 			cn = {
 				enabled = true,
 				translator = true,
