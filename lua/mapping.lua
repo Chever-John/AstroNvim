@@ -4,6 +4,10 @@ local M = {}
 -- local system = vim.loop.os_uname().sysname: 获取当前操作系统的名称并存储在 system 变量中。这用于根据不同的操作系统设置不同的按键映射。
 local system = vim.uv.os_uname().sysname
 
+local function toggle_terminal(direction, size)
+  return function() require("toggleterm").toggle(vim.v.count1, size, nil, direction) end
+end
+
 -- 定义模块的核心函数 core_mappings，接受一个 mappings 表作为参数。
 -- 这个表用于存储按键映射配置。如果未传入 mappings 参数，则使用 require("astrocore").empty_map_table() 创建一个空的映射表。
 function M.core_mappings(mappings)
@@ -50,6 +54,22 @@ function M.core_mappings(mappings)
     maps.v["<"] = { "<gv", desc = "Unindent line" }
     maps.v[">"] = { ">gv", desc = "Indent line" }
     maps.t["<Esc>"] = { [[<C-\><C-n>]], desc = "Exit terminal mode" }
+
+    maps.n["<Leader>th"] = {
+      toggle_terminal("horizontal", 10),
+      desc = "ToggleTerm horizontal split",
+    }
+    maps.n["<Leader>tv"] = {
+      toggle_terminal("vertical", 80),
+      desc = "ToggleTerm vertical split",
+    }
+    maps.n["<Leader>ts"] = {
+      function()
+        require "toggleterm"
+        vim.cmd.TermSelect()
+      end,
+      desc = "Select terminal",
+    }
 
     -- 在visual mode 里粘贴不要复制
     maps.n["x"] = { '"_x', desc = "Cut without copy" }

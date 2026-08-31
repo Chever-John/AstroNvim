@@ -1,3 +1,31 @@
+local function truncate_display(text, max_width)
+  if vim.fn.strdisplaywidth(text) <= max_width then return text end
+
+  local result = vim.fn.strcharpart(text, 0, max_width - 1)
+  while vim.fn.strdisplaywidth(result) > max_width - 1 do
+    result = vim.fn.strcharpart(result, 0, vim.fn.strchars(result) - 1)
+  end
+  return result .. "…"
+end
+
+local function diagnostic_summary(diagnostic)
+  local message = diagnostic.message:gsub("\n", " "):gsub("\t", " "):gsub("%s+", " "):gsub("^%s+", "")
+  local max_width = math.max(12, math.min(60, math.floor(vim.api.nvim_win_get_width(0) * 0.35)))
+  return truncate_display(message, max_width)
+end
+
+local function diagnostic_float()
+  return {
+    border = "rounded",
+    source = true,
+    header = "",
+    prefix = "",
+    max_width = math.max(1, math.floor(vim.o.columns * 0.8)),
+    max_height = math.max(1, math.floor(vim.o.lines * 0.5)),
+    wrap = true,
+  }
+end
+
 ---@type LazySpec
 return {
   "AstroNvim/astrocore",
@@ -57,7 +85,9 @@ return {
         -- Diagnostics configuration (for vim.diagnostics.config({...})) when diagnostics are on
         virtual_text = {
           prefix = "<",
+          format = diagnostic_summary,
         },
+        float = diagnostic_float,
         update_in_insert = true,
         underline = false,
       },
