@@ -1,6 +1,18 @@
 --TODO: https://github.com/golang/go/issues/60903
 local set_mappings = require("astrocore").set_mappings
 
+local leetcode_root = vim.fs.normalize(vim.fn.stdpath("data") .. "/leetcode")
+
+local function set_leetcode_gopls(config, root_dir)
+	if vim.fs.normalize(root_dir) ~= leetcode_root then
+		return
+	end
+
+	config.settings = vim.tbl_deep_extend("force", config.settings or {}, {
+		gopls = { analyses = { unusedfunc = false } },
+	})
+end
+
 local function preview_stack_trace()
 	local current_line = vim.api.nvim_get_current_line()
 	local patterns_list = {
@@ -49,6 +61,7 @@ return {
 			---@diagnostic disable: missing-fields
 			config = {
 				gopls = {
+					on_new_config = set_leetcode_gopls,
 					on_attach = function(client, _)
 						-- 下面这行代码创建了一个自动命令，该自动命令会在终端打开、终端关闭或进入缓冲区时触发。
 						vim.api.nvim_create_autocmd({ "TermOpen", "TermClose", "BufEnter" }, {
