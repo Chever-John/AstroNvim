@@ -15,11 +15,17 @@ local function leetcode_sources()
   }
 end
 
+local function source_provider(sources)
+  if type(sources) == "function" then return sources end
+  return function() return sources end
+end
+
 return {
   "Bekaboo/dropbar.nvim",
   event = "UIEnter",
   opts = function(_, opts)
-    local default_sources = vim.tbl_get(opts, "bar", "sources") or require("dropbar.configs").opts.bar.sources
+    local sources = vim.tbl_get(opts, "bar", "sources") or require("dropbar.configs").opts.bar.sources
+    local default_sources = source_provider(sources)
     opts.bar = opts.bar or {}
     opts.bar.sources = function(buf, win)
       if is_leetcode_buffer(buf) then return leetcode_sources() end

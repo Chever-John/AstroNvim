@@ -73,18 +73,15 @@ return {
 					-- （gopls 默认 standaloneTags 含 ignore），避免多道题
 					-- 同属 package main 时互报 redeclared。
 					-- build tag 与 package 之间必须留空行。
-					-- ListNode 只供本地诊断，@leet start 之外的代码不会提交。
-					before = {
-						"//go:build ignore",
-						"",
-						"package main",
-						"",
+					before = { "//go:build ignore", "", "package main" },
+					after = {
 						"type ListNode struct {",
 						"\tVal  int",
 						"\tNext *ListNode",
 						"}",
+						"",
+						"// Hello, Chever",
 					},
-					after = "// Hello, Chever",
 				},
 			},
 		}
