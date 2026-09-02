@@ -74,7 +74,14 @@ return {
 					-- 同属 package main 时互报 redeclared。
 					-- build tag 与 package 之间必须留空行。
 					before = { "//go:build ignore", "", "package main" },
-					after = "// Hello, Chever",
+					after = {
+						"type ListNode struct {",
+						"\tVal  int",
+						"\tNext *ListNode",
+						"}",
+						"",
+						"// Hello, Chever",
+					},
 				},
 			},
 		}

@@ -1,16 +1,44 @@
+local leetcode_root = vim.fs.normalize(vim.fn.stdpath("data") .. "/leetcode") .. "/"
+
+local function is_leetcode_buffer(buf)
+  local path = vim.fs.normalize(vim.api.nvim_buf_get_name(buf))
+  return vim.startswith(path, leetcode_root)
+end
+
+local function leetcode_sources()
+  local sources = require "dropbar.sources"
+  return {
+    require("dropbar.utils").source.fallback {
+      sources.lsp,
+      sources.treesitter,
+    },
+  }
+end
+
+local function source_provider(sources)
+  if type(sources) == "function" then return sources end
+  return function() return sources end
+end
+
 return {
   "Bekaboo/dropbar.nvim",
   event = "UIEnter",
-  opts = {},
+  opts = function(_, opts)
+    local sources = vim.tbl_get(opts, "bar", "sources") or require("dropbar.configs").opts.bar.sources
+    local default_sources = source_provider(sources)
+    opts.bar = opts.bar or {}
+    opts.bar.sources = function(buf, win)
+      if is_leetcode_buffer(buf) then return leetcode_sources() end
+      return default_sources(buf, win)
+    end
+  end,
   specs = {
     {
       "rebelot/heirline.nvim",
       optional = true,
-      opts = function (_, opts)
+      opts = function(_, opts)
         opts.winbar = nil
-        
       end,
-
     },
   },
 }
