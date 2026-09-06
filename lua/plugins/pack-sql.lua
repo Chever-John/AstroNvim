@@ -12,20 +12,18 @@ end
 
 local function formatting() return { "--dialect", "polyglot" } end
 
-local function diagnostic()
-  local system_config = vim.fn.stdpath "config" .. "/.sqlfluff"
+-- 以函数形式定义 linter：nvim-lint 每次运行前都会调用求值，
+-- --config 跟随当前 cwd 动态解析，且只在配置文件真实存在时才传入。
+-- 有 config 时替换掉默认 --dialect=ansi（dialect 交由配置文件决定）。
+local function sqlfluff()
+  local linter = vim.deepcopy(require "lint.linters.sqlfluff")
   local project_config = vim.fn.getcwd() .. "/.sqlfluff"
-
-  local sqlfluff = { "lint", "--format=json" }
-  table.insert(sqlfluff, "--config")
-
-  if vim.fn.filereadable(project_config) == 1 then
-    table.insert(sqlfluff, project_config)
-  else
-    table.insert(sqlfluff, system_config)
+  local system_config = vim.fn.stdpath "config" .. "/.sqlfluff"
+  local config = vim.fn.filereadable(project_config) == 1 and project_config or system_config
+  if vim.fn.filereadable(config) == 1 then
+    linter.args = { "lint", "--format=json", "--config", config }
   end
-
-  return sqlfluff
+  return linter
 end
 
 ---@type LazySpec
@@ -91,9 +89,7 @@ return {
     optional = true,
     opts = {
       linters = {
-        sqlfluff = {
-          args = diagnostic(),
-        },
+        sqlfluff = sqlfluff,
       },
       linters_by_ft = {
         sql = { "sqlfluff" },

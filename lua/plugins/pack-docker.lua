@@ -44,7 +44,9 @@ return {
     optional = true,
     opts = {
       linters_by_ft = {
-        ["docker-compose"] = { "hadolint" },
+        -- hadolint 是 Dockerfile linter；原先挂在 "docker-compose" 上既与实际
+        -- filetype（yaml.docker-compose）不匹配，语义上也不对
+        dockerfile = { "hadolint" },
       },
     },
   },

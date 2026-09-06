@@ -1,5 +1,4 @@
 local astrocore = require "astrocore"
-local utils = require "utils"
 
 local markdown_table_change = function()
   vim.ui.input({ prompt = "Separate Char: " }, function(input)
@@ -9,22 +8,15 @@ local markdown_table_change = function()
   end)
 end
 
-local function diagnostic()
-  local system_config = vim.fn.stdpath "config" .. "/.markdownlint.jsonc"
+-- 以函数形式定义 linter：nvim-lint 每次运行前都会调用求值，
+-- --config 跟随当前 cwd 动态解析，且只在配置文件真实存在时才传入
+local function markdownlint()
+  local linter = vim.deepcopy(require "lint.linters.markdownlint")
   local project_config = vim.fn.getcwd() .. "/.markdownlint.jsonc"
-
-  local markdownlint = require("lint").linters.markdownlint
-  if not utils.contains_arg(markdownlint.args, "--config") then table.insert(markdownlint.args, "--config") end
-
-  if vim.fn.filereadable(project_config) == 1 then
-    if not utils.contains_arg(markdownlint.args, project_config) then
-      table.insert(markdownlint.args, project_config)
-    end
-  else
-    if not utils.contains_arg(markdownlint.args, system_config) then table.insert(markdownlint.args, system_config) end
-  end
-
-  return markdownlint.args
+  local system_config = vim.fn.stdpath "config" .. "/.markdownlint.jsonc"
+  local config = vim.fn.filereadable(project_config) == 1 and project_config or system_config
+  if vim.fn.filereadable(config) == 1 then vim.list_extend(linter.args, { "--config", config }) end
+  return linter
 end
 
 ---@type LazySpec
@@ -117,8 +109,8 @@ return {
       bullet = {
         right_pad = 1,
       },
-      latext = {
-        enabled = true, 
+      latex = {
+        enabled = true,
         executable = vim.fn.expand('~/.local/bin/latexencode')
       }
     },
@@ -144,9 +136,7 @@ return {
     optional = true,
     opts = {
       linters = {
-        markdownlint = {
-          args = diagnostic(),
-        },
+        markdownlint = markdownlint,
       },
       linters_by_ft = {
         markdown = { "markdownlint" },

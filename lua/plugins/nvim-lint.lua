@@ -54,9 +54,17 @@ return {
       if not linters then return {} end
       return vim.tbl_filter(function(name)
         local linter = lint.linters[name]
-        return linter
-          and vim.fn.executable(linter.cmd) == 1
-          and not (type(linter) == "table")
+        -- nvim-lint 支持把 linter 定义为返回配置表的函数，运行前先求值
+        if type(linter) == "function" then
+          local ok, resolved = pcall(linter)
+          if not ok then return false end
+          linter = resolved
+        end
+        if type(linter) ~= "table" then return false end
+        -- 支持自定义 condition 字段（如 selene 仅在有 selene.toml 时启用）
+        if linter.condition and not linter.condition(ctx) then return false end
+        local cmd = type(linter.cmd) == "function" and linter.cmd() or linter.cmd
+        return type(cmd) ~= "string" or vim.fn.executable(cmd) == 1
       end, linters)
     end
 
