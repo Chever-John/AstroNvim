@@ -12,6 +12,11 @@ local file_exists = utils.file_exists
 local remove_lsp_cwd = utils.remove_lsp_cwd
 local get_lsp_root_dir = utils.get_lsp_root_dir
 
+-- neo-tree inputs.input 的回调在取消时收到 nil，且用户可能输入 N，统一在这里判断
+local function input_confirmed(value) return type(value) == "string" and value:lower():sub(1, 1) == "y" end
+
+local function edit_file(path) vim.cmd.edit(vim.fn.fnameescape(path)) end
+
 local file_extension_mapping = {
   go = function(file_path)
     local parent_name = get_immediate_parent_directory(file_path)
@@ -41,23 +46,25 @@ local file_extension_mapping = {
             if not select then return end
             if select == "src/lib.rs" then
               if not file_exists(lib_path) then
-                inputs.input("Create `src/lib.rs` (Y/N): ", "Y", function()
+                inputs.input("Create `src/lib.rs` (Y/N): ", "Y", function(value)
+                  if not input_confirmed(value) then return end
                   write_to_file(lib_path, "mod " .. filename .. ";\n")
-                  vim.cmd("e " .. lib_path)
+                  edit_file(lib_path)
                 end)
               else
                 insert_to_file_first_line(lib_path, "mod " .. filename .. ";\n")
-                vim.cmd("e " .. lib_path)
+                edit_file(lib_path)
               end
             elseif select == "src/main.rs" then
               if not file_exists(main_path) then
-                inputs.input("Create `src/main.rs` (Y/N): ", "Y", function()
-                  write_to_file(lib_path, "mod " .. filename .. ";\n")
-                  vim.cmd("e " .. main_path)
+                inputs.input("Create `src/main.rs` (Y/N): ", "Y", function(value)
+                  if not input_confirmed(value) then return end
+                  write_to_file(main_path, "mod " .. filename .. ";\n")
+                  edit_file(main_path)
                 end)
               else
                 insert_to_file_first_line(main_path, "mod " .. filename .. ";\n")
-                vim.cmd("e " .. main_path)
+                edit_file(main_path)
               end
             end
           end)
@@ -70,17 +77,18 @@ local file_extension_mapping = {
         return
       else
         inputs.input("Attach file to `mod.rs` (Y/N): ", nil, function(value)
-          if string.lower(value) == "y" then
+          if input_confirmed(value) then
             if not file_exists(mod_path) then
-              inputs.input("Create `mod.rs` (Y/N): ", nil, function()
+              inputs.input("Create `mod.rs` (Y/N): ", nil, function(create_value)
+                if not input_confirmed(create_value) then return end
                 write_to_file(mod_path, "mod " .. filename .. ";\n")
-                -- If a window for this lib_path already exists, refresh it
-                vim.schedule(function() vim.cmd("e " .. mod_path) end)
+                -- If a window for this mod_path already exists, refresh it
+                vim.schedule(function() edit_file(mod_path) end)
               end)
             else
               insert_to_file_first_line(mod_path, "mod " .. filename .. ";\n")
-              -- If a window for this lib_path already exists, refresh it
-              vim.schedule(function() vim.cmd("e " .. mod_path) end)
+              -- If a window for this mod_path already exists, refresh it
+              vim.schedule(function() edit_file(mod_path) end)
             end
           end
         end)
@@ -90,6 +98,16 @@ local file_extension_mapping = {
 }
 
 local inputs = require "neo-tree.ui.inputs"
+
+-- 以参数数组方式调用 trash，绕过 shell，避免特殊字符路径被解析/注入
+local function trash_path(path)
+  vim.fn.system { "trash", path }
+  if vim.v.shell_error ~= 0 then
+    vim.notify("Failed to trash: " .. path, vim.log.levels.ERROR)
+    return false
+  end
+  return true
+end
 
 -- Trash the target
 local function trash(state)
@@ -103,7 +121,7 @@ local function trash(state)
   inputs.confirm(msg, function(confirmed)
     if not confirmed then return end
 
-    vim.api.nvim_command("silent !trash " .. "'" .. node.path .. "'")
+    trash_path(node.path)
 
     require("neo-tree.sources.manager").refresh(state)
   end)
@@ -123,7 +141,7 @@ local function trash_visual(state, selected_nodes)
     if not confirmed then return end
 
     for _, path in ipairs(paths_to_trash) do
-      vim.api.nvim_command("silent !trash " .. "'" .. path .. "'")
+      trash_path(path)
     end
 
     require("neo-tree.sources.manager").refresh(state)
