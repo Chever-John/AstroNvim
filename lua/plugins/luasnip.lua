@@ -15,11 +15,13 @@ return {
   config = function(plugin, opts)
     local luasnip = require "luasnip"
 
-    local function remove_broken_forr()
+    local function remove_conflicting_go_snippets()
       local removed = false
 
       for _, snippet in ipairs(luasnip.get_snippets "go") do
-        if snippet.trigger == "forr" and snippet.name == "for range statement" then
+        local is_friendly_forr = snippet.trigger == "forr" and snippet.name == "for range statement"
+        local is_friendly_fori = snippet.trigger == "fori" and snippet.name == "for n statement"
+        if is_friendly_forr or is_friendly_fori then
           snippet:invalidate()
           removed = true
         end
@@ -31,7 +33,7 @@ return {
     vim.api.nvim_create_autocmd("User", {
       group = vim.api.nvim_create_augroup("user_go_snippet_overrides", { clear = true }),
       pattern = "LuasnipSnippetsAdded",
-      callback = remove_broken_forr,
+      callback = remove_conflicting_go_snippets,
     })
 
     require "astronvim.plugins.configs.luasnip"(plugin, opts) -- include the default astronvim config that calls the setup call
@@ -42,6 +44,6 @@ return {
       override_priority = 2000,
     }
 
-    remove_broken_forr()
+    remove_conflicting_go_snippets()
   end,
 }
