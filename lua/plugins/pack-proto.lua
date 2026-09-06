@@ -26,20 +26,15 @@ local function formatting()
   return format_args
 end
 
-local function diagnostic()
-  local system_config = vim.fn.stdpath "config" .. "/buf.yaml"
+-- 以函数形式定义 linter：nvim-lint 每次运行前都会调用求值，
+-- --config 跟随当前 cwd 动态解析，且只在配置文件真实存在时才传入
+local function buf_lint()
+  local linter = vim.deepcopy(require "lint.linters.buf_lint")
   local project_config = vim.fn.getcwd() .. "/buf.yaml"
-
-  local buf_lint = require("lint").linters.buf_lint
-  if not utils.contains_arg(buf_lint.args, "--config") then table.insert(buf_lint.args, "--config") end
-
-  if vim.fn.filereadable(project_config) == 1 then
-    if not utils.contains_arg(buf_lint.args, project_config) then table.insert(buf_lint.args, project_config) end
-  else
-    if not utils.contains_arg(buf_lint.args, system_config) then table.insert(buf_lint.args, system_config) end
-  end
-
-  return buf_lint.args
+  local system_config = vim.fn.stdpath "config" .. "/buf.yaml"
+  local config = vim.fn.filereadable(project_config) == 1 and project_config or system_config
+  if vim.fn.filereadable(config) == 1 then vim.list_extend(linter.args, { "--config", config }) end
+  return linter
 end
 
 ---@type LazySpec
@@ -120,9 +115,7 @@ return {
     optional = true,
     opts = {
       linters = {
-        buf_lint = {
-          args = diagnostic(),
-        },
+        buf_lint = buf_lint,
       },
       linters_by_ft = {
         proto = { "buf_lint" },

@@ -32,7 +32,7 @@ local function preview_stack_trace()
 	local filepath, line_nr, column_nr = try_patterns(patterns_list, current_line)
 	if filepath then
 		vim.cmd(":wincmd k")
-		vim.cmd("e " .. filepath)
+		vim.cmd.edit(vim.fn.fnameescape(filepath))
 		vim.api.nvim_win_set_cursor(0, { line_nr, column_nr })
 	end
 end

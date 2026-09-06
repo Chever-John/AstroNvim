@@ -186,7 +186,10 @@ function M.get_uri(file_path) return vim.uri_from_fname(file_path) end
 
 function M.on_confirm(prompt, callback)
   vim.ui.input({ prompt = prompt .. " (Yes/No): " }, function(input)
-    if string.lower(input) == "yes" or string.lower(input) == "y" then
+    -- 用户取消输入（Esc）时 input 为 nil
+    if type(input) ~= "string" then return end
+    local answer = string.lower(input)
+    if answer == "yes" or answer == "y" then
       if callback then callback() end
     end
   end)
@@ -288,12 +291,28 @@ end
 function M.get_parent_dir(path) return path:match "(.+)/" end
 
 function M.copy_file(source_file, target_file)
-  local target_file_parent_path = M.get_parent_dir(target_file)
-  local cmd = string.format("mkdir -p %s", vim.fn.shellescape(target_file_parent_path))
-  os.execute(cmd)
-  cmd = string.format("cp %s %s", vim.fn.shellescape(source_file), vim.fn.shellescape(target_file))
-  os.execute(cmd)
+  local parent = M.get_parent_dir(target_file)
+  if parent and vim.fn.isdirectory(parent) == 0 then
+    local mkdir_ok = pcall(vim.fn.mkdir, parent, "p")
+    if not mkdir_ok then
+      vim.schedule(function() vim.notify("Failed to create directory: " .. parent, vim.log.levels.ERROR) end)
+      return false
+    end
+  end
+  local ok, err = uv.fs_copyfile(source_file, target_file)
+  if not ok then
+    vim.schedule(
+      function()
+        vim.notify(
+          ("Failed to copy %s to %s: %s"):format(source_file, target_file, err or "unknown error"),
+          vim.log.levels.ERROR
+        )
+      end
+    )
+    return false
+  end
   vim.schedule(function() vim.notify("File " .. target_file .. " created success.", vim.log.levels.INFO) end)
+  return true
 end
 
 function M.get_filename_with_extension_from_path(path) return string.match(path, "([^/]+)$") end
