@@ -111,6 +111,12 @@ end
 ---@type LazySpec
 return {
 	"nvim-treesitter/nvim-treesitter",
+	init = function()
+		-- 部分解析器（如 jsonc，托管在 gitlab）的 tarball 下载地址会 404，
+		-- 导致 "Error during tarball extraction"；统一改用 git 拉取更稳。
+		local ok, install = pcall(require, "nvim-treesitter.install")
+		if ok then install.prefer_git = true end
+	end,
 	opts = {
 		ensure_installed = {
 			"lua",
