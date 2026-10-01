@@ -23,6 +23,9 @@ return {
 
   -- 这行配置了 nvcheatsheet-nvim 插件，它提供了一个快捷键速查表，可以方便地查看 AstroNvim 中定义的快捷键。
   { import = "astrocommunity.keybinding.nvcheatsheet-nvim" },
+  -- astrocommunity 里的 smartinellimarco/nvcheatsheet.nvim 已经 404（clone 时要求登录，Lazy 会卡在
+  -- "Too many rounds of missing plugins"）。改用原作者 Zeioth 的仓库，包含 lazy-lock 里锁定的同一个 commit。
+  { "smartinellimarco/nvcheatsheet.nvim", url = "https://github.com/Zeioth/nvcheatsheet.nvim.git" },
   {
     "AstroNvim/astrocore",
     opts = {
